@@ -18,6 +18,10 @@ body,
   @apply text-gray-900;
 }
 
+button {
+  cursor: pointer;
+}
+
 @media (min-width: 768px) {
   .custom-grid-rows {
     grid-template-rows: repeat(8, 20vh);

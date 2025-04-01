@@ -14,6 +14,9 @@ export async function GET(req) {
             },
           }
         : {},
+        orderBy: {
+          name: "asc"
+        }
     });
     return NextResponse.json(products, { status: 200 });
   } catch (error) {

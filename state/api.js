@@ -28,8 +28,8 @@ export const api = createApi({
         body: newProduct,
       }),
       invalidatesTags: ["Products"]
-    })
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useCreateUserMutation, useGetProductsQuery, useCreateProductMutation } = api;
+export const { useGetUsersQuery, useCreateUserMutation, useGetProductsQuery, useCreateProductMutation, useUpdateProductMutation } = api;

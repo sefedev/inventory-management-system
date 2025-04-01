@@ -1,5 +1,4 @@
 "use client";
-import Header from "../../components/Header";
 import React, { useState } from "react";
 
 const CreateProductModal = ({ isOpen, onClose, isLoading, onCreate }) => {
@@ -18,69 +17,98 @@ const CreateProductModal = ({ isOpen, onClose, isLoading, onCreate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onCreate(formData);
+
+    const formattedName = formData.name
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+
+    onCreate({
+      ...formData, name: formattedName
+    });
 
     setFormData({
       name: "",
       price: 0,
-    })
-    console.log(formData)
+    });
   };
-
-  const labelCssStyles = "block text-sm font-medium text-gray-700";
-  const inputCssStyles =
-    "block w-full mb-2 p-2 border-gray-500 border-2 rounded-mb";
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600/30 bg-opacity-50 overflow-y-auto size-full z-20">
-      <div className="relative top-20 mx-auto p-5 w-96 shadow-lg rounded-md bg-white">
-        <Header name="Create New Product" />
-        <form onSubmit={handleSubmit} className="mt-5">
-
-          {/* PRODUCT NAME */}
-          <label htmlFor="productName" className={labelCssStyles}>
-            Product Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            onChange={handleChange}
-            value={formData.name}
-            className={inputCssStyles}
-            required
-          />
-
-          {/* PRICE */}
-          <label htmlFor="productPrice" className={labelCssStyles}>
-            Price{" "}
-          </label>
-          <input
-            type="number"
-            name="price"
-            placeholder="price"
-            onChange={handleChange}
-            value={formData.price}
-            className={inputCssStyles}
-            required
-          />
-
-          {/* CREATE ACTIONS */}
-          <button
-            type="submit"
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-          >
-            {isLoading ? "Creating..." : "Create"}
-          </button>
+    <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="relative w-full max-w-md bg-white rounded-lg shadow-lg">
+        {/* HEADER */}
+        <div className="flex justify-between items-center px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Create New Product
+          </h2>
           <button
             onClick={onClose}
-            type="button"
-            className="px-4 py-2 ml-2 bg-gray-500 text-white rounded hover:bg-gray-700"
+            className="text-gray-500 hover:text-gray-700 focus:outline-none"
           >
-            Close
+            ✕
           </button>
+        </div>
+
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="px-6 py-4">
+          {/* PRODUCT NAME */}
+          <div className="mb-4">
+            <label
+              htmlFor="productName"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Product Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter product name"
+              onChange={handleChange}
+              value={formData.name}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              required
+            />
+          </div>
+
+          {/* PRICE */}
+          <div className="mb-4">
+            <label
+              htmlFor="productPrice"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Price
+            </label>
+            <input
+              type="number"
+              name="price"
+              placeholder="Enter product price"
+              onChange={handleChange}
+              value={formData.price}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              required
+            />
+          </div>
+
+          {/* ACTION BUTTONS */}
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating..." : "Create"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
