@@ -68,11 +68,11 @@ model VerificationToken {
 }
 
 model Product {
-  productId     String         @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  price         Float
-  saleItems     SaleItem[]
-  purchases     PurchaseItem[]
+  productId String         @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  price     Float
+  saleItems SaleItem[]
+  purchases PurchaseItem[]
 }
 
 model Sale {
@@ -88,6 +88,7 @@ model SaleItem {
   productId  String  @db.ObjectId
   quantity   Int
   unitPrice  Float
+  itemTotal  Float?
   product    Product @relation(fields: [productId], references: [productId])
   sale       Sale    @relation(fields: [saleId], references: [saleId])
 }
@@ -105,6 +106,7 @@ model PurchaseItem {
   productId      String   @db.ObjectId
   quantity       Int
   unitPrice      Float
+  itemTotal      Float?
   product        Product  @relation(fields: [productId], references: [productId])
   purchase       Purchase @relation(fields: [purchaseId], references: [purchaseId])
 }

@@ -8,11 +8,12 @@ import {
 } from "../../../state/api";
 import Header from "../../components/Header";
 import CreateProductModal from "./CreateProductModal";
+import { priceFormatter } from "@/utils/helper";
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
+ // const [activeDropdown, setActiveDropdown] = useState(null);
 
   const {
     data: products,
@@ -84,7 +85,6 @@ const Products = () => {
       </div>
 
       {/* PRODUCTS GRID */}
-      {/* PRODUCTS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products?.map((product) => (
           <div
@@ -97,7 +97,7 @@ const Products = () => {
                   {product.name}
                 </h3>
                 <p className="text-gray-600">
-                  &#8358;{new Intl.NumberFormat("en-NG", { style: "decimal",currencySign:"standard" }).format(product.price)}
+                  {priceFormatter(product.price)}
                 </p>
               </div>
               {/* 3-dot menu */}

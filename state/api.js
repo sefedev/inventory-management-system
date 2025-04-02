@@ -3,15 +3,15 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["Users", "Products"],
+  tagTypes: ["Users", "Products", "Purchases"],
   endpoints: (build) => ({
     getUsers: build.query({
-      query: () => "/users/get-users",
+      query: () => "api/users/get-users",
       providesTags: ["Users"],
     }),
     createUser: build.mutation({
       query: (user) => ({
-        url: "/users/create-user",
+        url: "api/users/create-user",
         method: "POST",
         body: user,
       }),
@@ -29,7 +29,19 @@ export const api = createApi({
       }),
       invalidatesTags: ["Products"]
     }),
+    getPurchases: build.query({
+      query:() => "/api/purchases/get-purchases",
+      providesTags: ['Purchases']
+    }),
+    createPurchase: build.mutation({
+      query: (newPurchase) => ({
+        url: "/api/purchases/create-purchase",
+        method: "POST",
+        body: newPurchase,
+      }),
+      invalidatesTags: ["Purchases"]
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useCreateUserMutation, useGetProductsQuery, useCreateProductMutation, useUpdateProductMutation } = api;
+export const { useGetUsersQuery, useCreateUserMutation, useGetProductsQuery, useCreateProductMutation, useGetPurchasesQuery, useCreatePurchaseMutation } = api;

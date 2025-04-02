@@ -1,55 +1,50 @@
-"use client";
+'use client'
 
+import React, { useState } from "react";
 import Header from "@/app/components/Header";
-import { DataGrid } from "@mui/x-data-grid";
-
-const columns = [
-  { field: "purchaseId", headerName: "ID", width: 90 },
-  { field: "productId", headerName: "ID", width: 90 },
-  { field: "timestamp", headerName: "Date & Time", width: 200 },
-  {
-    field: "quantity",
-    headerName: "Quantity",
-    width: 110,
-    type: "number",
-  },
-  {
-    field: "unitCost",
-    headerName: "Unit Cost",
-    width: 110,
-    type: "number",
-    valueGetter: (value, row) => `$${row.unitCost}`,
-  },
-  {
-    field: "totalCost",
-    headerName: "Total Cost",
-    width: 150,
-    type: "number",
-  },
-];
+import CreatePurchaseOrder from "./CreatePurchaseOrder";
+import ViewPurchaseOrders from "./ViewPurchaseOrders";
+import PurchaseDetailsModal from "./PurchaseDetailsModal";
+import { useGetPurchasesQuery } from "@/state/api";
 
 const Purchases = () => {
-  
-  const purchases = []
-  const isError = false
-  const isLoading = false
-  
-  if (isLoading) {
-    return <div className="py-4">Loading...</div>;
-  }
+  const [activeTab, setActiveTab] = useState("create"); // "create" or "view"
+  const [selectedPurchase, setSelectedPurchase] = useState(null); // For modal details
 
-  if (isError || !purchases) {
-    return (
-      <div className="text-center text-red-500 py-4">
-        Failed to fetch Purchases
-      </div>
-    );
-  }
+  const { data: purchases } = useGetPurchasesQuery();
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+
+  const _selectedPurchase = purchases?.filter((purchase) => purchase.purchaseId === selectedPurchase)[0]
+  console.log(_selectedPurchase, "THE SELECTED PURCHASES")
 
   return (
     <div className="flex flex-col">
       <Header name="Purchases" />
-      <DataGrid rows={purchases} columns={columns} getRowId={(row) => row.productId} checkboxSelection className="bg-white shadow rounded-lg border boder-gray-200 mt-5 !text-gray-700"/>
+      <div className="flex space-x-4 mt-4">
+        <button
+          className={`px-4 py-2 rounded ${
+            activeTab === "create" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => handleTabChange("create")}
+        >
+          Create Purchase Order
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${
+            activeTab === "view" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => handleTabChange("view")}
+        >
+          View Purchase Orders
+        </button>
+      </div>
+
+      {activeTab === "create" ? <CreatePurchaseOrder /> : <ViewPurchaseOrders setSelectedPurchase={setSelectedPurchase} purchases={purchases} />}
+      {selectedPurchase && <PurchaseDetailsModal purchase={_selectedPurchase} onClose={() => setSelectedPurchase(null)} />}
     </div>
   );
 };
