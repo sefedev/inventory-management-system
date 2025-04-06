@@ -1,55 +1,67 @@
 "use client";
 
 import { useState } from "react";
-import { Search, ShoppingCart, Plus, Minus, Trash2, Receipt, History } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  Plus,
+  Minus,
+  Trash2,
+  Receipt,
+  History,
+} from "lucide-react";
 import Header from "@/app/components/Header";
+import {
+  useGetProductsQuery,
+  useCreateSaleMutation,
+  useGetSalesQuery,
+} from "@/state/api";
+import { priceFormatter } from "@/utils/helper";
+import ViewSalesOrder from "./ViewSalesOrder";
+import SaleDetailsModal from "./SaleDetailModal";
 
 export default function SalesPage() {
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSales, setSelectedSales] = useState(null); // For modal details
   const [activeTab, setActiveTab] = useState("pos");
 
-  // Mock data - replace with actual data from your backend
-  const products = [
-    { id: "1", name: "Product 1", price: 19.99, stock: 50 },
-    { id: "2", name: "Product 2", price: 29.99, stock: 30 },
-    { id: "3", name: "Product 3", price: 39.99, stock: 20 },
-  ];
+  // Fetch products from the backend
+  const { data: products = [], isLoading: isProductsLoading } =
+    useGetProductsQuery();
 
-  const salesHistory = [
-    {
-      id: "S1",
-      date: "2024-03-20 14:30",
-      items: [{ ...products[0], quantity: 2 }],
-      total: 39.98,
-    },
-    {
-      id: "S2",
-      date: "2024-03-20 15:45",
-      items: [{ ...products[1], quantity: 1 }],
-      total: 29.99,
-    },
-  ];
+  // Fetch sales history from the backend
+  const { data: salesHistory = [], isLoading: isSalesLoading } =
+    useGetSalesQuery();
 
+  // Mutation to create a sale
+  const [createSale, { isLoading: isCreatingSale }] = useCreateSaleMutation();
+
+  // Add product to cart
   const addToCart = (product) => {
     setCart((currentCart) => {
-      const existingItem = currentCart.find((item) => item.id === product.id);
+      const existingItem = currentCart.find(
+        (item) => item.productId === product.productId
+      );
       if (existingItem) {
+        // Update the quantity of the existing item
         return currentCart.map((item) =>
-          item.id === product.id
+          item.productId === product.productId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
+      // Add the new product to the cart
       return [...currentCart, { ...product, quantity: 1 }];
     });
   };
 
+  // Update product quantity in cart
   const updateQuantity = (productId, change) => {
     setCart((currentCart) =>
       currentCart
         .map((item) =>
-          item.id === productId
+          item.productId === productId
             ? { ...item, quantity: Math.max(0, item.quantity + change) }
             : item
         )
@@ -57,17 +69,46 @@ export default function SalesPage() {
     );
   };
 
+  // Calculate total cost of the cart
   const calculateTotal = () => {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
+  console.log("Sales History", salesHistory);
+  // Complete the sale
+  const handleCompleteSale = async () => {
+    if (cart.length === 0) {
+      alert("Cart is empty. Add items to the cart before completing the sale.");
+      return;
+    }
+
+    const saleData = {
+      items: cart.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.price,
+      })),
+    };
+
+    try {
+      await createSale(saleData).unwrap();
+      alert("Sale completed successfully!");
+      setCart([]); // Clear the cart after successful sale
+    } catch (error) {
+      console.error("Failed to complete sale:", error);
+      alert("Failed to complete sale. Please try again.");
+    }
+  };
+
+  // Filter products based on search term
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="w-full mx-auto md:px-8">
-      <Header name="Sales"/>
+      <Header name="Sales" />
+      {/* TAB NAVIGATION */}
       <div className="mb-6">
         <div className="flex border-b">
           <button
@@ -100,6 +141,8 @@ export default function SalesPage() {
       </div>
 
       {activeTab === "pos" ? (
+        // POS
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Products Section */}
           <div className="bg-white p-4 rounded-lg shadow">
@@ -114,27 +157,33 @@ export default function SalesPage() {
               />
             </div>
 
-            <div className="h-[500px] overflow-auto pr-4">
-              <div className="grid grid-cols-1 gap-4">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
-                    onClick={() => addToCart(product)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium">{product.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          Stock: {product.stock}
+            {isProductsLoading ? (
+              <p>Loading products...</p>
+            ) : (
+              <div className="h-[500px] overflow-auto pr-4">
+                <div className="grid grid-cols-1 gap-4">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product.productId}
+                      className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+                      onClick={() => addToCart(product)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">{product.name}</h3>
+                          <p className="text-sm text-gray-500">
+                            Stock: {product.stock}
+                          </p>
+                        </div>
+                        <p className="font-semibold">
+                          {priceFormatter(product.price)}
                         </p>
                       </div>
-                      <p className="font-semibold">${product.price}</p>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Cart Section */}
@@ -144,95 +193,105 @@ export default function SalesPage() {
               Current Sale
             </h2>
 
-            <div className="h-[400px] overflow-auto pr-4">
+            <div className="max-h-[400px] overflow-auto pr-4">
               <div className="space-y-4">
-                {cart.map((item) => (
-                  <div key={item.id} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium">{item.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          ${item.price} each
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          className="p-1 hover:bg-gray-100 rounded"
-                          onClick={() => updateQuantity(item.id, -1)}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <button
-                          className="p-1 hover:bg-gray-100 rounded"
-                          onClick={() => updateQuantity(item.id, 1)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="p-1 hover:bg-red-100 text-red-500 rounded"
-                          onClick={() => updateQuantity(item.id, -item.quantity)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                {cart.length === 0 ? (
+                  <p className="my-4 text-gray-500 text-center">
+                    No item in the cart...
+                  </p>
+                ) : (
+                  cart.map((item) => (
+                    <div key={item.productId} className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">{item.name}</h3>
+                          <p className="text-sm text-gray-500">
+                            {priceFormatter(item.price)} each
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            className="p-1 hover:bg-gray-100 rounded"
+                            onClick={() => updateQuantity(item.productId, -1)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="w-8 text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-gray-100 rounded"
+                            onClick={() => updateQuantity(item.productId, 1)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                          <button
+                            className="p-1 hover:bg-red-100 text-red-500 rounded"
+                            onClick={() =>
+                              updateQuantity(item.productId, -item.quantity)
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-between items-center text-xl font-semibold">
-                <span>Total:</span>
-                <span>${calculateTotal().toFixed(2)}</span>
+            {cart.length > 0 && (
+              <div className="mt-6 space-y-4">
+                <div className="flex justify-between items-center text-xl font-semibold">
+                  <span>Total:</span>
+                  <span>{priceFormatter(calculateTotal())}</span>
+                </div>
+                <button
+                  onClick={handleCompleteSale}
+                  disabled={isCreatingSale}
+                  className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 ${
+                    isCreatingSale
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600 text-white"
+                  }`}
+                >
+                  <Receipt className="h-5 w-5" />
+                  {isCreatingSale ? "Processing..." : "Complete Sale"}
+                </button>
               </div>
-              <button className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2">
-                <Receipt className="h-5 w-5" />
-                Complete Sale
-              </button>
-            </div>
+            )}
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sale ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Items
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {salesHistory.map((sale) => (
-                <tr key={sale.id}>
-                  <td className="px-6 py-4 whitespace-nowrap font-medium">
-                    {sale.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{sale.date}</td>
-                  <td className="px-6 py-4">
-                    {sale.items
-                      .map((item) => `${item.quantity}x ${item.name}`)
-                      .join(", ")}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    ${sale.total.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        // SALES HISTORY
+     
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            {isSalesLoading ? (
+              <p>Loading sales history...</p>
+            ) : (
+              <div className="p-4">
+                {salesHistory.length === 0 ? (
+                  <p>No sales history available.</p>
+                ) : (
+                  <div className="max-h-[400px] overflow-auto pr-4">
+                    <ViewSalesOrder
+                      setSelectedSales={setSelectedSales}
+                      sales={salesHistory}
+                    />
+                    {selectedSales && (
+                      <SaleDetailsModal
+                        sale={salesHistory?.find(
+                          (sale) => sale.saleId === selectedSales
+                        )}
+                        onClose={() => setSelectedSales(null)}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
       )}
     </div>
   );
