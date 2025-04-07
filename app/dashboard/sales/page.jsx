@@ -27,7 +27,7 @@ export default function SalesPage() {
   const [activeTab, setActiveTab] = useState("pos");
 
   // Fetch products from the backend
-  const { data: products = [], isLoading: isProductsLoading } =
+  const { data: products = [], isLoading: isProductsLoading, refetch } =
     useGetProductsQuery();
 
   // Fetch sales history from the backend
@@ -39,12 +39,20 @@ export default function SalesPage() {
 
   // Add product to cart
   const addToCart = (product) => {
+    if (product.stockAvailable <= 0) {
+      alert("Product is out of stock.");
+      return;
+    }
     setCart((currentCart) => {
       const existingItem = currentCart.find(
         (item) => item.productId === product.productId
       );
       if (existingItem) {
-        // Update the quantity of the existing item
+        // Update the quantity of the existing item & check stock availability
+        if (existingItem.quantity >= product.stockAvailable) {
+          alert("Cannot add more items than available in stock.");
+          return currentCart;
+        } 
         return currentCart.map((item) =>
           item.productId === product.productId
             ? { ...item, quantity: item.quantity + 1 }
@@ -58,6 +66,17 @@ export default function SalesPage() {
 
   // Update product quantity in cart
   const updateQuantity = (productId, change) => {
+    console.log("cart", cart);
+    
+    //check stock availability
+    const product = products.find((item) => item.productId === productId);
+    const stockAvailable = product?.stockAvailable || 0;
+    const currentItem = cart.find((item) => item.productId === productId);
+    const currentQuantity = currentItem ? currentItem.quantity : 0;
+    if (currentQuantity + change > stockAvailable) {
+      alert("Cannot add more items than available in stock.");
+      return;
+    }
     setCart((currentCart) =>
       currentCart
         .map((item) =>
@@ -74,7 +93,6 @@ export default function SalesPage() {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
-  console.log("Sales History", salesHistory);
   // Complete the sale
   const handleCompleteSale = async () => {
     if (cart.length === 0) {
@@ -91,7 +109,7 @@ export default function SalesPage() {
     };
 
     try {
-      await createSale(saleData).unwrap();
+      await createSale(saleData).unwrap();refetch()
       alert("Sale completed successfully!");
       setCart([]); // Clear the cart after successful sale
     } catch (error) {
@@ -160,19 +178,21 @@ export default function SalesPage() {
             {isProductsLoading ? (
               <p>Loading products...</p>
             ) : (
+              // PRODUCTS LIST
               <div className="h-[500px] overflow-auto pr-4">
                 <div className="grid grid-cols-1 gap-4">
                   {filteredProducts.map((product) => (
                     <div
                       key={product.productId}
-                      className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+                      role="button"
+                      className="p-4 shadow border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
                       onClick={() => addToCart(product)}
                     >
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">{product.name}</h3>
-                          <p className="text-sm text-gray-500">
-                            Stock: {product.stock}
+                          <p className="text-sm text-gray-700">
+                            Stock: {product.stockAvailable}
                           </p>
                         </div>
                         <p className="font-semibold">
@@ -193,6 +213,7 @@ export default function SalesPage() {
               Current Sale
             </h2>
 
+            {/* Cart List */}
             <div className="max-h-[400px] overflow-auto pr-4">
               <div className="space-y-4">
                 {cart.length === 0 ? (
@@ -201,7 +222,7 @@ export default function SalesPage() {
                   </p>
                 ) : (
                   cart.map((item) => (
-                    <div key={item.productId} className="p-4 border rounded-lg">
+                    <div key={item.productId} className="p-4 border shadow border-gray-300 rounded-lg">
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">{item.name}</h3>
@@ -240,7 +261,7 @@ export default function SalesPage() {
                 )}
               </div>
             </div>
-
+              {/* Total and complete Sales button */}
             {cart.length > 0 && (
               <div className="mt-6 space-y-4">
                 <div className="flex justify-between items-center text-xl font-semibold">

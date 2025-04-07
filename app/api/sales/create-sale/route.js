@@ -47,7 +47,29 @@ export async function POST(request) {
       );
     }
 
-    //Calculate total amount and item totals
+    // Validate Stock availability
+    const products = await prisma.product.findMany({
+      where: { productId: { in: productIds } },
+      select: { productId: true, stockAvailable: true },
+    });
+
+    const insufficientStock = items.filter((item) => {
+      const product = products.find((p) => p.productId === item.productId);
+      return !product || product.stockAvailable < item.quantity;
+    });
+
+    if (insufficientStock.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Insufficient stock for product(s): ${insufficientStock
+            .map((item) => item.productId)
+            .join(", ")}`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Calculate total amount and item totals
     const saleItems = items.map((item) => ({
       ...item,
       itemTotal: item.quantity * item.unitPrice,
@@ -85,6 +107,26 @@ export async function POST(request) {
         },
       });
     });
+
+     //Update stock for each product
+     const updateStockPromises = items.map((item) => {
+      return prisma.product.update({
+        where: { productId: item.productId },
+        data: {
+          stockAvailable: {
+            decrement: item.quantity, // Subtract Sold quantity from stock
+          },
+        },
+      });
+    })
+    
+
+    try {
+      const results = await Promise.all(updateStockPromises);
+      console.log("Stock updated successfully:", results);
+    } catch (error) {
+      console.error("Error updating stock:", error.message);
+    }
 
     return NextResponse.json(saleOrder, { status: 201 });
   } catch (error) {

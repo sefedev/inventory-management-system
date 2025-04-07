@@ -13,6 +13,9 @@ export async function GET() {
           },
         },
       },
+      orderBy: {
+        timestamp: 'desc',
+      },
     });
 
     return NextResponse.json(sales, { status: 200 });

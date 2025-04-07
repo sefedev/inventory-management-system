@@ -6,10 +6,26 @@ export async function POST(request) {
     const body = await request.json();
     const { name, price } = body;
 
+    // Validate input
+    if (!name || typeof name !== "string") {
+      return NextResponse.json(
+        { error: "Invalid input. 'name' must be a non-empty string." },
+        { status: 400 }
+      );
+    }
+
+    if (typeof price !== "number" || price <= 0) {
+      return NextResponse.json(
+        { error: "Invalid input. 'price' must be a number greater than 0." },
+        { status: 400 }
+      );
+    }
+
     const product = await prisma.product.create({
       data: {
-        name, price
-      }
+        name,
+        price,
+      },
     });
 
     console.log("Product created successfully", product);

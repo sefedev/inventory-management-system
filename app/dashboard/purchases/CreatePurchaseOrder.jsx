@@ -14,7 +14,7 @@ const CreatePurchaseOrder = () => {
   const [productError, setProductError] = useState(false);
   const [isLoading, setIsLoading] =useState(false)
 
-  const { data: products } = useGetProductsQuery();
+  const { data: products, refetch } = useGetProductsQuery();
 
   const [createPurchase] = useCreatePurchaseMutation();
 
@@ -55,7 +55,9 @@ const CreatePurchaseOrder = () => {
     console.log(purchaseItems, "THE PURCHASE ITEMS")
     try {
       const response = await createPurchase({purchaseItems})
+      refetch()
       console.log("Purchase Created", response)
+      alert("Purchase Created Successfully")
     } catch (error) {
       console.error("Cannot create Purchase:", error)
     } finally {

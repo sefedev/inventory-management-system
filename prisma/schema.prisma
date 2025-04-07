@@ -68,11 +68,12 @@ model VerificationToken {
 }
 
 model Product {
-  productId String         @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  price     Float
-  saleItems SaleItem[]
-  purchases PurchaseItem[]
+  productId      String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  price          Float
+  stockAvailable Int            @default(0)
+  saleItems      SaleItem[]
+  purchases      PurchaseItem[]
 }
 
 model Sale {

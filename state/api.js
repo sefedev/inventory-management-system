@@ -17,8 +17,12 @@ export const api = createApi({
       }),
       invalidatesTags: ["Users"]
     }),
-    getProducts: build.query({
+    getProductsBySearch: build.query({
       query:(searchTerm) => `/api/products/get-products?search=${searchTerm || ""}`,
+      providesTags: ["Products"],
+    }),
+    getProducts: build.query({
+      query:() => "/api/products/get-products",
       providesTags: ["Products"],
     }),
     createProduct: build.mutation({
@@ -56,4 +60,4 @@ export const api = createApi({
   }),
 });
 
-export const { useGetUsersQuery, useCreateUserMutation, useGetProductsQuery, useCreateProductMutation, useGetPurchasesQuery, useCreatePurchaseMutation, useGetSalesQuery, useCreateSaleMutation } = api;
+export const { useGetUsersQuery, useCreateUserMutation,useGetProductsBySearchQuery, useGetProductsQuery, useCreateProductMutation, useGetPurchasesQuery, useCreatePurchaseMutation, useGetSalesQuery, useCreateSaleMutation } = api;

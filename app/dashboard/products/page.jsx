@@ -1,10 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { PlusCircleIcon, SearchIcon } from "lucide-react";
+import {
+  Plus,
+  PlusCircleIcon,
+  SearchIcon,
+  SearchX,
+  SearchXIcon,
+} from "lucide-react";
 import {
   useGetProductsQuery,
   useCreateProductMutation,
+  useGetProductsBySearchQuery,
 } from "../../../state/api";
 import Header from "../../components/Header";
 import CreateProductModal from "./CreateProductModal";
@@ -13,7 +20,7 @@ import { priceFormatter } from "@/utils/helper";
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
- // const [activeDropdown, setActiveDropdown] = useState(null);
+  // const [activeDropdown, setActiveDropdown] = useState(null);
 
   const {
     data: products,
@@ -21,7 +28,9 @@ const Products = () => {
     error,
     isLoading,
     refetch,
-  } = useGetProductsQuery(searchTerm);
+  } = useGetProductsBySearchQuery(searchTerm);
+
+  const { data: allProducts } = useGetProductsQuery();
 
   const [createProduct] = useCreateProductMutation();
 
@@ -84,51 +93,80 @@ const Products = () => {
         </div>
       </div>
 
-      {/* PRODUCTS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products?.map((product) => (
-          <div
-            key={product.productId}
-            className="border border-gray-200 shadow-md rounded-lg p-4 hover:shadow-lg transition duration-150 relative"
+      {/* NO PRODUCT ERROR UI */}
+      {allProducts?.length === 0 && (
+        <div className="flex w-full flex-col items-center justify-center text-center py-10">
+          <Plus className="h-16 w-16 text-gray-400 mb-4" />
+          <p className="text-gray-600 text-lg font-medium mb-2">
+            No Products Available
+          </p>
+          <p className="text-gray-500 text-sm mb-6">
+            Add a product to get started.
+          </p>
+          <button
+            className="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow-md transition duration-150"
+            onClick={() => setIsModalOpen(true)}
           >
-            <div className="flex justify-between items-center">
+            <PlusCircleIcon className="w-5 h-5 mr-2" /> Add Product
+          </button>
+        </div>
+      )}
+      {/* NO SEARCH RESULT UI */}
+      {products?.length === 0 && allProducts?.length > 0 && (
+        <div className="flex flex-col items-center justify-center text-center py-6">
+          <SearchXIcon className="h-12 w-12 text-gray-400 mb-4" />
+          <p className="text-gray-600 text-lg font-medium">
+            No matching products found
+          </p>
+          <p className="text-gray-500 text-sm">
+            Try searching with a different keyword.
+          </p>
+        </div>
+      )}
+
+      {/* PRODUCTS GRID */}
+      {allProducts?.length > 0 && products?.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {/* {products?.map((product) => (
+            <div
+              key={product.productId}
+              className="border flex justify-between items-center border-gray-200 shadow-md rounded-lg p-4 hover:shadow-lg transition duration-150 relative"
+            >
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">
                   {product.name}
                 </h3>
-                <p className="text-gray-600">
-                  {priceFormatter(product.price)}
-                </p>
+                <p className="text-gray-600">{priceFormatter(product.price)}</p>
               </div>
-              {/* 3-dot menu */}
-              {/* <div className="relative">
-                <button
-                  className="text-gray-500 font-bold text-2xl hover:text-gray-700 focus:outline-none"
-                  onClick={() => toggleDropdown(product.productId)}
-                >
-                  &#x22EE;
-                </button>
-                {isDropdownOpen(product.productId) && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                    <button
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => handleEditProduct(product)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
-                      onClick={() => handleDeleteProduct(product.productId)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div> */}
             </div>
-          </div>
-        ))}
-      </div>
+          ))} */}
+
+{products?.map((product) => (
+  <div
+    key={product.productId}
+    className="border flex flex-col justify-between border-gray-200 shadow-md rounded-lg p-4 hover:shadow-lg transition duration-150 relative"
+  >
+    <div>
+      <h3 className="text-lg font-semibold text-gray-800">
+        {product.name}
+      </h3>
+      <p className="text-gray-600">{priceFormatter(product.price)}</p>
+    </div>
+    <div className="mt-4">
+      <p
+        className={`font-medium ${
+          product.stockAvailable > 0 ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {product.stockAvailable > 0
+          ? `${product.stockAvailable} in stock`
+          : "Out of stock"}
+      </p>
+    </div>
+  </div>
+))}
+        </div>
+      )}
 
       {/* MODAL */}
       <CreateProductModal

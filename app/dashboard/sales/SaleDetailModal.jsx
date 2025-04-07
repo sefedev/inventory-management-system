@@ -11,7 +11,6 @@ const SaleDetailsModal = ({ sale, onClose }) => {
       hour12: true,
     }).format(new Date(dd));
 
-    console.log("Sale Details Modal", sale);
   if (!sale) return null; // Return null if sale is not provided
 
   return (
