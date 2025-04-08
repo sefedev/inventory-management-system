@@ -3,6 +3,7 @@ import { priceFormatter } from "@/utils/helper";
 import { LoaderCircle, Trash2Icon } from "lucide-react";
 
 import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 const CreatePurchaseOrder = () => {
   const [productList, setProductList] = useState([]); //purchase order product List
@@ -55,11 +56,28 @@ const CreatePurchaseOrder = () => {
     console.log(purchaseItems, "THE PURCHASE ITEMS")
     try {
       const response = await createPurchase({purchaseItems})
+      toast.success("Purchase Created Successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       refetch()
       console.log("Purchase Created", response)
-      alert("Purchase Created Successfully")
     } catch (error) {
       console.error("Cannot create Purchase:", error)
+       toast.error(error, {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
     } finally {
       setProductList([])
       setIsLoading(false)
@@ -69,6 +87,7 @@ const CreatePurchaseOrder = () => {
 
   return (
     <div className="mt-6 md:flex-row flex-col gap-12 items-start flex">
+      <ToastContainer />
       {/* CREATE PURCHASE ORDER */}
       <div className="space-y-4 flex-1 border h-96 border-gray-300 rounded w-full md:max-w-lg p-4">
         <h2 className="text-lg font-semibold mb-4">Create Purchase Order</h2>

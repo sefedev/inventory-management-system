@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Plus,
   PlusCircleIcon,
@@ -16,6 +17,7 @@ import {
 import Header from "../../components/Header";
 import CreateProductModal from "./CreateProductModal";
 import { priceFormatter } from "@/utils/helper";
+import { toast, ToastContainer } from "react-toastify";
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,11 +34,7 @@ const Products = () => {
 
   const { data: allProducts } = useGetProductsQuery();
 
-  const [createProduct] = useCreateProductMutation();
-
-  useEffect(() => {
-    console.log(products);
-  }, [products]);
+  const [createProduct, {isLoading: isCreating}] = useCreateProductMutation();
 
   // const toggleDropdown = (productId) => {
   //   setActiveDropdown((prev) => (prev === productId ? null : productId));
@@ -45,30 +43,37 @@ const Products = () => {
   // const isDropdownOpen = (productId) => activeDropdown === productId;
 
   const handleCreateProduct = async (productData) => {
+    setIsModalOpen(false);
     try {
       await createProduct(productData).unwrap();
       refetch();
-      setIsModalOpen(false);
+      
+      toast.success("Product has been created successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } catch (error) {
+      toast.error(error, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       console.error("Error Creating product:", error);
     }
   };
 
-  if (isLoading && !isModalOpen) {
-    return <div className="py-4 text-center text-gray-500">Loading...</div>;
-  }
-
-  if (isError || !products) {
-    console.log(error);
-    return (
-      <div className="text-center text-red-500 py-4">
-        Failed to fetch products
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto pb-5 w-full max-w-7xl">
+      <ToastContainer />
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <Header name="Products" />
@@ -93,6 +98,32 @@ const Products = () => {
         </div>
       </div>
 
+     {/* LOADING UI */}
+{isLoading && !isModalOpen && (
+  <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+    <SearchIcon className="h-10 w-10 animate-spin mb-4 text-blue-500" />
+    <p className="text-lg font-medium">Loading products...</p>
+  </div>
+)}
+
+      {/* FAILED TO FETCH PRODUCT ERROR UI */}
+      {isError && !isModalOpen && (
+        <div className="flex flex-col items-center justify-center text-center py-10">
+          <SearchX className="h-16 w-16 text-gray-400 mb-4" />
+          <p className="text-gray-600 text-lg font-medium mb-2">
+            Failed to fetch products
+          </p>
+          <p className="text-gray-500 text-sm mb-6">{error?.data}</p>
+          <button
+            className="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow-md transition duration-150"
+            onClick={() => refetch()}
+          >
+            <PlusCircleIcon className="w-5 h-5 mr-2" /> Retry
+          </button>
+        </div>
+      )}
+
+
       {/* NO PRODUCT ERROR UI */}
       {allProducts?.length === 0 && (
         <div className="flex w-full flex-col items-center justify-center text-center py-10">
@@ -111,6 +142,7 @@ const Products = () => {
           </button>
         </div>
       )}
+
       {/* NO SEARCH RESULT UI */}
       {products?.length === 0 && allProducts?.length > 0 && (
         <div className="flex flex-col items-center justify-center text-center py-6">

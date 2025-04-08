@@ -101,12 +101,12 @@ const Sidebar = () => {
           label="Products"
           isCollapsed={isSideBarCollapsed}
         />
-        <SidebarLink
+        {/* <SidebarLink
           href="/dashboard/inventory"
           icon={Archive}
           label="Inventory"
           isCollapsed={isSideBarCollapsed}
-        />
+        /> */}
          <SidebarLink
           href="/dashboard/sales"
           icon={CircleDollarSign}
@@ -119,12 +119,12 @@ const Sidebar = () => {
           label="Purchases"
           isCollapsed={isSideBarCollapsed}
         />
-        <SidebarLink
+        {/* <SidebarLink
           href="/dashboard/users"
           icon={User}
           label="Users"
           isCollapsed={isSideBarCollapsed}
-        />
+        /> */}
         <SidebarLink
           href="/dashboard/settings"
           icon={SlidersHorizontal}
@@ -136,7 +136,7 @@ const Sidebar = () => {
       {/* FOOTER */}
       <div className={`${isSideBarCollapsed ? "hidden" : "block"} mb-10`}>
         <p className="text-center text-xs text-gray-500">
-          &copy; 2024 Sefstock
+          &copy; {new Date().getFullYear()} Sefstock
         </p>
       </div>
     </div>

@@ -19,6 +19,7 @@ import {
 import { priceFormatter } from "@/utils/helper";
 import ViewSalesOrder from "./ViewSalesOrder";
 import SaleDetailsModal from "./SaleDetailModal";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function SalesPage() {
   const [cart, setCart] = useState([]);
@@ -27,8 +28,11 @@ export default function SalesPage() {
   const [activeTab, setActiveTab] = useState("pos");
 
   // Fetch products from the backend
-  const { data: products = [], isLoading: isProductsLoading, refetch } =
-    useGetProductsQuery();
+  const {
+    data: products = [],
+    isLoading: isProductsLoading,
+    refetch,
+  } = useGetProductsQuery();
 
   // Fetch sales history from the backend
   const { data: salesHistory = [], isLoading: isSalesLoading } =
@@ -40,7 +44,15 @@ export default function SalesPage() {
   // Add product to cart
   const addToCart = (product) => {
     if (product.stockAvailable <= 0) {
-      alert("Product is out of stock.");
+      toast.error("Product is Out of Stock", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
     setCart((currentCart) => {
@@ -50,9 +62,17 @@ export default function SalesPage() {
       if (existingItem) {
         // Update the quantity of the existing item & check stock availability
         if (existingItem.quantity >= product.stockAvailable) {
-          alert("Cannot add more items than available in stock.");
+          toast.error("Cannot add more items than available in stock.", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
           return currentCart;
-        } 
+        }
         return currentCart.map((item) =>
           item.productId === product.productId
             ? { ...item, quantity: item.quantity + 1 }
@@ -66,15 +86,22 @@ export default function SalesPage() {
 
   // Update product quantity in cart
   const updateQuantity = (productId, change) => {
-    console.log("cart", cart);
-    
+
     //check stock availability
     const product = products.find((item) => item.productId === productId);
     const stockAvailable = product?.stockAvailable || 0;
     const currentItem = cart.find((item) => item.productId === productId);
     const currentQuantity = currentItem ? currentItem.quantity : 0;
     if (currentQuantity + change > stockAvailable) {
-      alert("Cannot add more items than available in stock.");
+      toast.error("Cannot add more items than available in stock.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
     setCart((currentCart) =>
@@ -96,7 +123,15 @@ export default function SalesPage() {
   // Complete the sale
   const handleCompleteSale = async () => {
     if (cart.length === 0) {
-      alert("Cart is empty. Add items to the cart before completing the sale.");
+      toast.error("Cart is empty. Add items to the cart before completing the sale.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
 
@@ -109,12 +144,29 @@ export default function SalesPage() {
     };
 
     try {
-      await createSale(saleData).unwrap();refetch()
-      alert("Sale completed successfully!");
+      await createSale(saleData).unwrap();
+      refetch();
+      toast.success("Sales Created Successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       setCart([]); // Clear the cart after successful sale
     } catch (error) {
       console.error("Failed to complete sale:", error);
-      alert("Failed to complete sale. Please try again.");
+      toast.error(error, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
 
@@ -125,6 +177,7 @@ export default function SalesPage() {
 
   return (
     <div className="w-full mx-auto md:px-8">
+      <ToastContainer />
       <Header name="Sales" />
       {/* TAB NAVIGATION */}
       <div className="mb-6">
@@ -222,7 +275,10 @@ export default function SalesPage() {
                   </p>
                 ) : (
                   cart.map((item) => (
-                    <div key={item.productId} className="p-4 border shadow border-gray-300 rounded-lg">
+                    <div
+                      key={item.productId}
+                      className="p-4 border shadow border-gray-300 rounded-lg"
+                    >
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">{item.name}</h3>
@@ -261,7 +317,7 @@ export default function SalesPage() {
                 )}
               </div>
             </div>
-              {/* Total and complete Sales button */}
+            {/* Total and complete Sales button */}
             {cart.length > 0 && (
               <div className="mt-6 space-y-4">
                 <div className="flex justify-between items-center text-xl font-semibold">
@@ -286,33 +342,33 @@ export default function SalesPage() {
         </div>
       ) : (
         // SALES HISTORY
-     
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            {isSalesLoading ? (
-              <p>Loading sales history...</p>
-            ) : (
-              <div className="p-4">
-                {salesHistory.length === 0 ? (
-                  <p>No sales history available.</p>
-                ) : (
-                  <div className="max-h-[400px] overflow-auto pr-4">
-                    <ViewSalesOrder
-                      setSelectedSales={setSelectedSales}
-                      sales={salesHistory}
+
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          {isSalesLoading ? (
+            <p>Loading sales history...</p>
+          ) : (
+            <div className="p-4">
+              {salesHistory.length === 0 ? (
+                <p>No sales history available.</p>
+              ) : (
+                <div className="max-h-[400px] overflow-auto pr-4">
+                  <ViewSalesOrder
+                    setSelectedSales={setSelectedSales}
+                    sales={salesHistory}
+                  />
+                  {selectedSales && (
+                    <SaleDetailsModal
+                      sale={salesHistory?.find(
+                        (sale) => sale.saleId === selectedSales
+                      )}
+                      onClose={() => setSelectedSales(null)}
                     />
-                    {selectedSales && (
-                      <SaleDetailsModal
-                        sale={salesHistory?.find(
-                          (sale) => sale.saleId === selectedSales
-                        )}
-                        onClose={() => setSelectedSales(null)}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
