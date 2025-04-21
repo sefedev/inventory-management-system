@@ -76,7 +76,7 @@ const Navbar = () => {
         <Link href="/dashboard/settings">
           <Settings className="cursor-pointer text-gray-500" size={24} />
         </Link>
-        {/* <button className="cursor-pointer p-2 rounded hover:bg-gray-200" onClick={() => signOut()}>Signout</button> */}
+        <button className="cursor-pointer p-2 rounded hover:bg-gray-200" onClick={() => signOut()}>Signout</button>
       </div>
     </div>
   );

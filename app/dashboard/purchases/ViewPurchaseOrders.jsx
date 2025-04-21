@@ -25,6 +25,15 @@ const ViewPurchaseOrders = ({ setSelectedPurchase, purchases }) => {
     },
   ];
 
+  if (!purchases || purchases.length === 0) {
+    return (
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold mb-4 ">Purchase Orders</h2>
+        <p className="bg-white shadow p-4 rounded-lg">No purchase orders available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6">
       <h2 className="text-lg font-semibold mb-4">Purchase Orders</h2>

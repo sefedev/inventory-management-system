@@ -1,22 +1,18 @@
 "use client";
 
-import { CheckCircle, Package, Tag, TrendingDown, TrendingUp } from "lucide-react";
 import CardPopularProducts from "../components/ui/CardPopularProducts";
 import CardSalesSummary from "../components/ui/CardSalesSummary";
 import CardPurchaseSummary from "../components/ui/CardPurchaseSummary";
-import StatCard from "../components/ui/StatCard";
-import { useSession } from "next-auth/react";
-
 
 const Dashboard = () => {
-  const session = useSession()
-  console.log(session)
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xl:overflow-auto gap-10 pb-4 custom-grid-rows">
       <CardPopularProducts />
-      <CardSalesSummary />
+      {/* <CardSalesSummary /> */}
       <CardPurchaseSummary />
-      <StatCard
+      <>
+      {/* <StatCard
         title="Customer & Expenses"
         primaryIcon={<Package className="text-blue-600 size-6" />}
         dateRange="22 - 29 October 2023"
@@ -72,7 +68,8 @@ const Dashboard = () => {
             IconComponent: TrendingDown,
           },
         ]}
-      />
+      /> */}
+      </>
       </div>
   );
 };

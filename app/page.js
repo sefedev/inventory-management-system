@@ -1,7 +1,7 @@
 "use client";
 import { useCreateUserMutation } from "@/state/api";
 import { KeyIcon } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -15,11 +15,13 @@ export default function Home() {
     return;
    }
 
-   if(session?.user) {
+   const { data: updatedSession } = await useSession();
+
+   if(updatedSession?.user) {
     const userData = {
-      name: session.user.name,
-      email: session.user.email,
-      image: session.user.image,
+      name: updatedSession.user.name,
+      email: updatedSession.user.email,
+      image: updatedSession.user.image,
       emailVerified: new Date().toISOString()
     }
     try {
@@ -86,7 +88,6 @@ export default function Home() {
         <KeyIcon />
         <span>Sign in with GitHub</span>
       </button>
-      <button onClick={() => signOut()}></button>
     </div>
   );
 }

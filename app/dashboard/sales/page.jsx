@@ -9,12 +9,14 @@ import {
   Trash2,
   Receipt,
   History,
+  LoaderCircle,
 } from "lucide-react";
 import Header from "@/app/components/Header";
 import {
   useGetProductsQuery,
   useCreateSaleMutation,
   useGetSalesQuery,
+  useGetSalesSummaryQuery,
 } from "@/state/api";
 import { priceFormatter } from "@/utils/helper";
 import ViewSalesOrder from "./ViewSalesOrder";
@@ -38,6 +40,8 @@ export default function SalesPage() {
   const { data: salesHistory = [], isLoading: isSalesLoading } =
     useGetSalesQuery();
 
+  const {data:saleSummary} =  useGetSalesSummaryQuery()
+console.log(saleSummary, "SALE SUMMARY!!")
   // Mutation to create a sale
   const [createSale, { isLoading: isCreatingSale }] = useCreateSaleMutation();
 
@@ -146,7 +150,7 @@ export default function SalesPage() {
     try {
       await createSale(saleData).unwrap();
       refetch();
-      toast.success("Sales Created Successfully", {
+      toast.success("Sales Order Created Successfully", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -227,10 +231,15 @@ export default function SalesPage() {
                 className="w-full p-2 border rounded-md"
               />
             </div>
+            {!isProductsLoading && products.length <= 0 && (<p className=" my-4 text-center text-gray-500">No Products available</p>)}
 
-            {isProductsLoading ? (
-              <p>Loading products...</p>
-            ) : (
+            {isProductsLoading && (
+              <p className="flex flex-col justify-center items-center">
+                <LoaderCircle className="animate-spin" />
+                Loading products...
+                </p>
+            ) }
+              {products.length > 0 &&
               // PRODUCTS LIST
               <div className="h-[500px] overflow-auto pr-4">
                 <div className="grid grid-cols-1 gap-4">
@@ -255,8 +264,8 @@ export default function SalesPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              </div>}
+            
           </div>
 
           {/* Cart Section */}
@@ -345,7 +354,10 @@ export default function SalesPage() {
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {isSalesLoading ? (
-            <p>Loading sales history...</p>
+            <p className="flex flex-col p-4 justify-center items-center">
+                <LoaderCircle className="animate-spin" />
+                Loading Sales History...
+                </p>
           ) : (
             <div className="p-4">
               {salesHistory.length === 0 ? (
