@@ -5,28 +5,28 @@ import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 export default function Home() {
-  const { data: session } = useSession();
-  const [createUser] = useCreateUserMutation();
+  // const { data: session } = useSession();
+  // const [createUser] = useCreateUserMutation();
 
-  useEffect(() => {
-    // If session exists, create user in DB
-    if (session?.user) {
-      const userData = {
-        name: session.user.name,
-        email: session.user.email,
-        image: session.user.image,
-        emailVerified: new Date().toISOString(),
-      };
-      createUser(userData)
-        .unwrap()
-        .then((response) => {
-          console.log(response, "User Created Successfully");
-        })
-        .catch((error) => {
-          console.error("Error creating user:", error);
-        });
-    }
-  }, [session, createUser]);
+  // useEffect(() => {
+  //   // If session exists, create user in DB
+  //   if (session?.user) {
+  //     const userData = {
+  //       name: session.user.name,
+  //       email: session.user.email,
+  //       image: session.user.image,
+  //       emailVerified: new Date().toISOString(),
+  //     };
+  //     createUser(userData)
+  //       .unwrap()
+  //       .then((response) => {
+  //         console.log(response, "User Created Successfully");
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error creating user:", error);
+  //       });
+  //   }
+  // }, [session, createUser]);
 
   const handleCreateUser = async () => {
     await signIn("github", { redirectTo: "/dashboard" });
