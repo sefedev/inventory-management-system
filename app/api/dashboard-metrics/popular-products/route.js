@@ -3,8 +3,22 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
+
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId")?.toString();
+
+    console.log(userId, "USER ID>>>")
+
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
     // Fetch the 10 most popular products by sales
     const popularProducts = await prisma.product.findMany({
+      where: { userId },
       select: {
         productId: true,
         name: true,
@@ -40,7 +54,7 @@ export async function GET(req) {
     const topProducts = productsWithSalesData
       .sort((a, b) => b.totalQuantitySold - a.totalQuantitySold)
       .slice(0, 10);
-
+      
     return NextResponse.json(topProducts, { status: 200 });
   } catch (error) {
     console.error("Failed to fetch popular products", error);

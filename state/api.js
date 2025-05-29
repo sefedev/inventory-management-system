@@ -20,8 +20,10 @@ export const api = createApi({
       invalidatesTags: ["Users"],
     }),
     getProductsBySearch: build.query({
-      query: (searchTerm) =>
-        `/api/products/get-products?search=${searchTerm || ""}`,
+      query: ({ search, userId }) =>
+        `/api/products/get-products?search=${search || ""}&userId=${
+          userId || ""
+        }`,
       providesTags: ["Products"],
     }),
     getProducts: build.query({
@@ -37,7 +39,7 @@ export const api = createApi({
       invalidatesTags: ["Products"],
     }),
     getPurchases: build.query({
-      query: () => "/api/purchases/get-purchases",
+      query: (userId) => `/api/purchases/get-purchases?userId=${userId || ""}`,
       providesTags: ["Purchases"],
     }),
     createPurchase: build.mutation({
@@ -49,7 +51,7 @@ export const api = createApi({
       invalidatesTags: ["Purchases"],
     }),
     getSales: build.query({
-      query: () => "/api/sales/get-sales",
+      query: (userId) => `/api/sales/get-sales?userId=${userId || ""}`,
       providesTags: ["Sales"],
     }),
     createSale: build.mutation({
@@ -61,7 +63,8 @@ export const api = createApi({
       invalidatesTags: ["Sales"],
     }),
     getPopularProducts: build.query({
-      query: () => "/api/dashboard-metrics/popular-products",
+      query: ({userId}) =>
+        `/api/dashboard-metrics/popular-products?userId=${userId || ""}`,
       providesTags: ["DashboardMetrics"],
     }),
     getSalesSummary: build.query({

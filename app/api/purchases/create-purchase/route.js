@@ -4,9 +4,15 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { purchaseItems } = body;
+    const { userId, purchaseItems } = body;
 
     // Validate input
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required.' },
+        { status: 400 }
+      );
+    }
     if (!Array.isArray(purchaseItems) || purchaseItems.length === 0) {
       return NextResponse.json(
         { error: 'Invalid input. Ensure purchaseItems is a non-empty array.' },
@@ -56,6 +62,7 @@ export async function POST(request) {
     const purchaseOrder = await prisma.$transaction(async (prisma) => {
       return prisma.purchase.create({
         data: {
+          userId,
           totalAmount,
           purchaseItems: {
             create: purchaseItems.map((item) => ({

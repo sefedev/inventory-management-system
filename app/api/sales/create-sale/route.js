@@ -2,15 +2,27 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
+  
   try {
     const body = await request.json();
-    const { items } = body;
+    const { userId, items } = body;
 
     // Validate input
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: 'Invalid input. Ensure items is a non-empty array.' },
         { status: 400 }
+      );
+    }
+
+        const userExists = await prisma.user.findUnique({
+      where: {id: userId}
+    })
+
+    if(!userExists) {
+      return NextResponse.json(
+        { error: "User not found." },
+        { status: 404 }
       );
     }
 
@@ -81,6 +93,7 @@ export async function POST(request) {
     const saleOrder = await prisma.$transaction(async (prisma) => {
       return prisma.sale.create({
         data: {
+          userId,
           totalAmount,
           saleItems: {
             create: saleItems.map((item) => ({

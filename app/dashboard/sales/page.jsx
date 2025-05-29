@@ -13,15 +13,16 @@ import {
 } from "lucide-react";
 import Header from "@/app/components/Header";
 import {
-  useGetProductsQuery,
   useCreateSaleMutation,
   useGetSalesQuery,
   useGetSalesSummaryQuery,
+  useGetProductsBySearchQuery,
 } from "@/state/api";
 import { priceFormatter } from "@/utils/helper";
 import ViewSalesOrder from "./ViewSalesOrder";
 import SaleDetailsModal from "./SaleDetailModal";
 import { toast, ToastContainer } from "react-toastify";
+import { useSession } from "next-auth/react";
 
 export default function SalesPage() {
   const [cart, setCart] = useState([]);
@@ -29,16 +30,25 @@ export default function SalesPage() {
   const [selectedSales, setSelectedSales] = useState(null); // For modal details
   const [activeTab, setActiveTab] = useState("pos");
 
+  const session = useSession();
+  
+  const userId = session?.data?.user?.id;
+
   // Fetch products from the backend
   const {
     data: products = [],
     isLoading: isProductsLoading,
     refetch,
-  } = useGetProductsQuery();
+  } = useGetProductsBySearchQuery(userId ? { search: searchTerm, userId } : null,
+    { skip: !userId });
+
+  console.log(products, "PRODUCTS");
 
   // Fetch sales history from the backend
   const { data: salesHistory = [], isLoading: isSalesLoading } =
-    useGetSalesQuery();
+    useGetSalesQuery( userId ? userId : null, {
+    skip: !userId,
+  });
 
   const {data:saleSummary} =  useGetSalesSummaryQuery()
 console.log(saleSummary, "SALE SUMMARY!!")
@@ -148,7 +158,7 @@ console.log(saleSummary, "SALE SUMMARY!!")
     };
 
     try {
-      await createSale(saleData).unwrap();
+      await createSale({userId, items:saleData.items}).unwrap();
       refetch();
       toast.success("Sales Order Created Successfully", {
         position: "top-right",

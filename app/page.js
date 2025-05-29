@@ -41,7 +41,7 @@ export default function Home() {
       <h1 className="text-4xl text-center font-bold mb-10">
         Inventory Management Software
       </h1>
-      <form className="bg-white p-6 rounded shadow-md w-80">
+      {/* <form className="bg-white p-6 rounded shadow-md w-80">
         <div className="mb-4">
           <h2 className="text-2xl text-center font-bold mb-6">Sign In</h2>
           <label
@@ -79,7 +79,7 @@ export default function Home() {
         >
           Sign In
         </button>
-      </form>
+      </form> */}
 
       <button
         onClick={handleCreateUser}

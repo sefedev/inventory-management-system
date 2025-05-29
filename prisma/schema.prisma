@@ -74,6 +74,7 @@ model Product {
   stockAvailable Int            @default(0)
   saleItems      SaleItem[]
   purchases      PurchaseItem[]
+  userId String @db.ObjectId
 }
 
 model Sale {
@@ -81,6 +82,7 @@ model Sale {
   timestamp   DateTime   @default(now())
   totalAmount Float
   saleItems   SaleItem[]
+  userId String @db.ObjectId
 }
 
 model SaleItem {
@@ -99,6 +101,7 @@ model Purchase {
   timestamp     DateTime       @default(now())
   totalAmount   Float
   purchaseItems PurchaseItem[]
+  userId String @db.ObjectId
 }
 
 model PurchaseItem {

@@ -6,20 +6,27 @@ import CreatePurchaseOrder from "./CreatePurchaseOrder";
 import ViewPurchaseOrders from "./ViewPurchaseOrders";
 import PurchaseDetailsModal from "./PurchaseDetailsModal";
 import { useGetPurchasesQuery } from "@/state/api";
+import { useSession } from "next-auth/react";
 
 const Purchases = () => {
   const [activeTab, setActiveTab] = useState("create"); // "create" or "view"
   const [selectedPurchase, setSelectedPurchase] = useState(null); // For modal details
 
-  const { data: purchases } = useGetPurchasesQuery();
+  const { data: session } = useSession(); // Get session data
+  const userId = session?.user?.id; // Extract userId from session
+
+  const { data: purchases } = useGetPurchasesQuery(userId ? userId : null, {
+    skip: !userId,
+  });
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
+  console.log(purchases, "VIEW PURCHASES")
+
 
   const _selectedPurchase = purchases?.filter((purchase) => purchase.purchaseId === selectedPurchase)[0]
-  console.log(_selectedPurchase, "THE SELECTED PURCHASES")
 
   return (
     <div className="flex flex-col">

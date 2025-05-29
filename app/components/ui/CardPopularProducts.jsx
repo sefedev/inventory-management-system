@@ -1,20 +1,29 @@
+"use client";
+
 import { useGetPopularProductsQuery } from "@/state/api";
 import { priceFormatter } from "@/utils/helper";
 import { LoaderCircle, ShoppingBag } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const CardPopularProducts = () => {
   // Mock data for demonstration purposes
-  const {data: popularProducts, isLoading, isError} = useGetPopularProductsQuery()
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
+  const {
+    data: popularProducts,
+    isLoading,
+    isError,
+  } = useGetPopularProductsQuery(userId ? { userId } : {}, { skip: !userId });
 
   return (
     <div className="row-span-3 xl:row-span-6 grid place-items-center bg-white shadow-md rounded-2xl pb-8">
       {isLoading ? (
         <div className=" text-center flex flex-col items-center justify-center">
-          <LoaderCircle className="animate-spin"/>
-          Loading Popular Products...</div>
+          <LoaderCircle className="animate-spin" />
+          Loading Popular Products...
+        </div>
       ) : (
-        
         <div className="w-full">
           <h3 className="text-lg font-semibold px-7 pt-5 pb-2">
             Popular Products
@@ -35,7 +44,8 @@ const CardPopularProducts = () => {
                       {priceFormatter(product.price)}
                     </span>
                     <span className="text-xs text-gray-500">
-                      Total Sold: {priceFormatter(product.totalAccumulatedAmount)}
+                      Total Sold:{" "}
+                      {priceFormatter(product.totalAccumulatedAmount)}
                     </span>
                     <span className="text-xs text-gray-500">
                       Stock Quantity: {product.stockQuantity}
@@ -54,7 +64,8 @@ const CardPopularProducts = () => {
                 No popular products available.
               </div>
             )}
-          </div></div>
+          </div>
+        </div>
       )}
     </div>
   );

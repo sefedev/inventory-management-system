@@ -3,9 +3,24 @@ import { NextResponse } from 'next/server';
 
 
 
-export async function GET() {
+export async function GET(req) {
   try {
+       const {searchParams} = new URL(req.url)
+    const userId = searchParams.get('userId')?.toString()
+    
+    // Validate UserID
+    if (!userId) {
+      return NextResponse.json(
+        { message: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+
+
     const sales = await prisma.sale.findMany({
+      where: {
+        userId
+      },
       include: {
         saleItems: {
           include: {

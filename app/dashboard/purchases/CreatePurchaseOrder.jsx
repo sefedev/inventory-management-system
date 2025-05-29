@@ -1,6 +1,7 @@
-import { useCreatePurchaseMutation, useGetProductsQuery } from "@/state/api";
+import { useCreatePurchaseMutation, useGetProductsBySearchQuery, useGetProductsQuery } from "@/state/api";
 import { priceFormatter } from "@/utils/helper";
 import { LoaderCircle, Trash2Icon } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
@@ -15,7 +16,18 @@ const CreatePurchaseOrder = () => {
   const [productError, setProductError] = useState(false);
   const [isLoading, setIsLoading] =useState(false)
 
-  const { data: products, refetch } = useGetProductsQuery();
+const session = useSession();
+  
+  const userId = session?.data?.user?.id;
+
+  // Fetch products from the backend
+  const {
+    data: products = [],
+    isLoading: isProductsLoading,
+    refetch,
+  } = useGetProductsBySearchQuery(userId ? { search: '', userId } : null,
+    { skip: !userId });
+
 
   const [createPurchase] = useCreatePurchaseMutation();
 
@@ -55,7 +67,7 @@ const CreatePurchaseOrder = () => {
     }));
     console.log(purchaseItems, "THE PURCHASE ITEMS")
     try {
-      const response = await createPurchase({purchaseItems})
+      const response = await createPurchase({userId, purchaseItems})
       toast.success("Purchase Created Successfully", {
         position: "top-right",
         autoClose: 3000,

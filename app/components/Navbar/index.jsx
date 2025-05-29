@@ -6,10 +6,10 @@ import { Bell, Menu, Moon, Settings, Sun } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 const Navbar = () => {
-  const session = useSession()
+  const session = useSession();
 
   const dispatch = useAppDispatch();
 
@@ -18,6 +18,9 @@ const Navbar = () => {
   );
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+
+  // Dropdown for Signout on hover Profile Image/name
+  const [openDropdown, setOpenDropdown] = useState();
 
   const toggleSideBar = () => {
     dispatch(setIsSideBarCollapsed(!isSideBarCollapsed));
@@ -68,15 +71,36 @@ const Navbar = () => {
             </span>
           </div> */}
           <hr className="w-0 h-7 border border-solid border-l border-gray-300 mx-1" />
-          <div className="flex items-center gap-1 cursor-pointer">
-            <img className="rounded-full border-1 border-gray-400" src={session.data.user.image} alt="avatar" width={30} height={30}/>
-            <span className="font-semibold line-clamp-1">{session.data.user.name}</span>
+          {/* PROFILE NAME AND AVATAR */}
+          <div
+            className="flex relative items-center gap-1 cursor-pointer"
+            onMouseEnter={() => setOpenDropdown(true)}
+            onMouseLeave={() => setOpenDropdown(false)}
+          >
+            {openDropdown && (
+              <div className="absolute inset-6 z-50 mt-2 w-24 h-fit bg-white rounded-md shadow-lg">
+                
+                  <button
+                    className="cursor-pointer p-2 rounded hover:bg-gray-200 text-xs w-full"
+                    onClick={() => signOut()}
+                  >
+                    Logout
+                  </button>
+                
+              </div>
+            )}
+            <span className="font-semibold line-clamp-1">
+              {session.data.user.name}
+            </span>
+            <img
+              className="rounded-full border-1 border-gray-400"
+              src={session.data.user.image}
+              alt="avatar"
+              width={30}
+              height={30}
+            />
           </div>
         </div>
-        <Link href="/dashboard/settings">
-          <Settings className="cursor-pointer text-gray-500" size={24} />
-        </Link>
-        <button className="cursor-pointer p-2 rounded hover:bg-gray-200" onClick={() => signOut()}>Signout</button>
       </div>
     </div>
   );

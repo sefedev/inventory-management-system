@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, price } = body;
+    const {userId, name, price } = body;
 
     // Validate input
     if (!name || typeof name !== "string") {
@@ -21,8 +21,20 @@ export async function POST(request) {
       );
     }
 
+    const userExists = await prisma.user.findUnique({
+      where: {id: userId}
+    })
+
+    if(!userExists) {
+      return NextResponse.json(
+        { error: "User not found." },
+        { status: 404 }
+      );
+    }
+
     const product = await prisma.product.create({
       data: {
+        userId,
         name,
         price,
       },

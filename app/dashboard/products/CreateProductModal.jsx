@@ -1,7 +1,10 @@
 "use client";
+import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 
 const CreateProductModal = ({ isOpen, onClose, isLoading, onCreate }) => {
+  const session = useSession()
+  const userId = session?.data?.user?.id
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
@@ -25,7 +28,7 @@ const CreateProductModal = ({ isOpen, onClose, isLoading, onCreate }) => {
 
 
     onCreate({
-      ...formData, name: formattedName
+      userId, ...formData, name: formattedName
     });
 
     setFormData({

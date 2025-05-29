@@ -67,10 +67,10 @@ const Sidebar = () => {
       {/* TOP LOGO */}
       <div
         className={`flex gap-3 justify-between md:justify-normal items-center pt-8 ${
-          isSideBarCollapsed ? "px-5" : "px-8"
+          isSideBarCollapsed ? "px-4" : "px-8"
         }`}
       >
-        <div>logo</div>
+        <div className="rounded-full px-2.5 py-1 font-bold bg-gray-700 text-gray-300">S</div>
         <h1
           className={`font-extrabold text-xl ${
             isSideBarCollapsed ? "hidden" : "block"
